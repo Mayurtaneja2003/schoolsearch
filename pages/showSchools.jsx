@@ -25,8 +25,12 @@ export default function ShowSchoolsPage() {
 							<div key={school.id} className="bg-white rounded-lg shadow hover:shadow-md transition overflow-hidden">
 								<div className="aspect-video bg-gray-100">
 									{(() => {
-										const raw = school.imagePath || '';
-										const src = raw ? (raw.startsWith('/') ? raw : `/${raw.replace(/\\/g, '/')}`) : '/schoolImages/placeholder.svg';
+												const raw = school.imagePath || '';
+												const src = raw
+												  ? /^https?:\/\//.test(raw)
+												    ? raw
+												    : `/${raw.replace(/\\/g, '/')}`
+												  : '/schoolImages/placeholder.svg';
 										return (
 											<img
 												src={src}

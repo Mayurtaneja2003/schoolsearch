@@ -32,16 +32,16 @@ async function main() {
 			`INSERT INTO schools (name, address, city, state, contact, email, imagePath) VALUES
 			(?,?,?,?,?,?,?), (?,?,?,?,?,?,?), (?,?,?,?,?,?,?), (?,?,?,?,?,?,?), (?,?,?,?,?,?,?), (?,?,?,?,?,?,?), (?,?,?,?,?,?,?), (?,?,?,?,?,?,?), (?,?,?,?,?,?,?), (?,?,?,?,?,?,?)`,
 			[
-				'Green Valley High', '123 Park Ave', 'Delhi', 'Delhi', '9999999999', 'gvh@example.com', '/schoolImages/Img1.webp',
-				'Blue Ridge Public', '45 Lake Road', 'Mumbai', 'Maharashtra', '8888888888', 'brp@example.com', '/schoolImages/Img2.webp',
-				'Sunrise Academy', '9 Hill Street', 'Pune', 'Maharashtra', '7777777777', 'sa@example.com', '/schoolImages/Img3.jpg',
-				'Silver Oak International', '78 Elm Street', 'Bengaluru', 'Karnataka', '6666666666', 'soi@example.com', '/schoolImages/Img4.jpg',
-				'Lotus Valley School', '22 MG Road', 'Gurgaon', 'Haryana', '9555555555', 'lvs@example.com', '/schoolImages/Img5.webp',
-				'Heritage Public School', '5 River Lane', 'Chennai', 'Tamil Nadu', '9444444444', 'hps@example.com', '/schoolImages/Img6.webp',
-				'Bright Future Academy', '14 Lake View', 'Kolkata', 'West Bengal', '9333333333', 'bfa@example.com', '/schoolImages/Img7.webp',
-				'Royal Kids Academy', '9 Palace Road', 'Jaipur', 'Rajasthan', '9222222222', 'rka@example.com', '/schoolImages/Img8.webp',
-				'Future Minds School', '3 Tech Park', 'Hyderabad', 'Telangana', '9111111111', 'fms@example.com', '/schoolImages/Img9.webp',
-				'National Star School', '17 Freedom Street', 'Lucknow', 'Uttar Pradesh', '9000000000', 'nss@example.com', '/schoolImages/Img10.webp'
+				'Green Valley High', '123 Park Ave', 'Delhi', 'Delhi', '9999999999', 'gvh@example.com', 'https://res.cloudinary.com/dagp859yh/image/upload/v1756810471/Img1_feuytj.webp',
+				'Blue Ridge Public', '45 Lake Road', 'Mumbai', 'Maharashtra', '8888888888', 'brp@example.com', 'https://res.cloudinary.com/dagp859yh/image/upload/v1756810465/Img2_wayqqy.webp',
+				'Sunrise Academy', '9 Hill Street', 'Pune', 'Maharashtra', '7777777777', 'sa@example.com', 'https://res.cloudinary.com/dagp859yh/image/upload/v1756810464/Img3_ie0iu7.jpg',
+				'Silver Oak International', '78 Elm Street', 'Bengaluru', 'Karnataka', '6666666666', 'soi@example.com', 'https://res.cloudinary.com/dagp859yh/image/upload/v1756810469/Img4_znap9w.jpg',
+				'Lotus Valley School', '22 MG Road', 'Gurgaon', 'Haryana', '9555555555', 'lvs@example.com', 'https://res.cloudinary.com/dagp859yh/image/upload/v1756810472/Img5_cgplmi.webp',
+				'Heritage Public School', '5 River Lane', 'Chennai', 'Tamil Nadu', '9444444444', 'hps@example.com', 'https://res.cloudinary.com/dagp859yh/image/upload/v1756810466/Img6_oytbeb.webp',
+				'Bright Future Academy', '14 Lake View', 'Kolkata', 'West Bengal', '9333333333', 'bfa@example.com', 'https://res.cloudinary.com/dagp859yh/image/upload/v1756810475/Img7_oxbrm9.webp',
+				'Royal Kids Academy', '9 Palace Road', 'Jaipur', 'Rajasthan', '9222222222', 'rka@example.com', 'https://res.cloudinary.com/dagp859yh/image/upload/v1756810468/Img8_vnnkln.webp',
+				'Future Minds School', '3 Tech Park', 'Hyderabad', 'Telangana', '9111111111', 'fms@example.com', 'https://res.cloudinary.com/dagp859yh/image/upload/v1756810467/Img9_s0nrqx.webp',
+				'National Star School', '17 Freedom Street', 'Lucknow', 'Uttar Pradesh', '9000000000', 'nss@example.com', 'https://res.cloudinary.com/dagp859yh/image/upload/v1756810470/Img10_bgi5nn.webp'
 			]
 		);
 	console.log('Inserted sample schools.');

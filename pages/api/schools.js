@@ -1,7 +1,16 @@
+
 import fs from 'fs';
 import path from 'path';
 import { IncomingForm } from 'formidable';
 import db from '@/lib/db';
+import { v2 as cloudinary } from 'cloudinary';
+
+// Configure Cloudinary
+cloudinary.config({
+	cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+	api_key: process.env.CLOUDINARY_API_KEY,
+	api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export const config = {
 	api: {
@@ -69,12 +78,25 @@ export default async function handler(req, res) {
 				return res.status(400).json({ success: false, message: 'Contact must be 10 digits.' });
 			}
 
+
 			let imagePath = null;
 			const imageFile = files?.image;
 			if (imageFile) {
 				const fileObj = Array.isArray(imageFile) ? imageFile[0] : imageFile;
-				const relative = path.join('schoolImages', path.basename(fileObj.filepath || fileObj.path || fileObj.newFilename || fileObj.originalFilename));
-				imagePath = `/${relative.replace(/\\/g, '/')}`;
+				// Read file buffer
+				const fileBuffer = fs.readFileSync(fileObj.filepath || fileObj.path);
+				const fileStr = fileBuffer.toString('base64');
+				const mimetype = fileObj.mimetype || 'image/jpeg';
+				try {
+					const uploadResponse = await cloudinary.uploader.upload(
+						`data:${mimetype};base64,${fileStr}`,
+						{ folder: 'schoolImages' }
+					);
+					imagePath = uploadResponse.secure_url;
+				} catch (err) {
+					// fallback: no imagePath
+					imagePath = null;
+				}
 			}
 
 			try {
