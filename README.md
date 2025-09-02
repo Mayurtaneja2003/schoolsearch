@@ -1,3 +1,62 @@
+School Manager (Next.js + MySQL)
+
+Project structure
+
+```
+school-manager/
+  lib/
+    db.js                     # MySQL pool (auto-creates DB)
+  pages/
+    index.js                  # Home (links to add/view)
+    addSchool.jsx             # Add school form (react-hook-form)
+    showSchools.jsx           # List schools (cards)
+    api/
+      schools.js              # GET list, POST create (multipart + formidable)
+      
+    _app.js                   # Global layout (header)
+    _document.js              # Base document
+  public/
+    schoolImages/             # Uploaded images + placeholder.svg
+  scripts/
+    seed.js                   # Resets table and inserts sample rows
+  styles/
+    globals.css
+  package.json
+```
+
+Setup
+
+1) Create `.env.local` in project root:
+
+```
+MYSQL_HOST=localhost
+MYSQL_USER=root
+MYSQL_PASSWORD=
+MYSQL_DATABASE=school_manager
+```
+
+2) Install deps and run:
+
+```
+npm install
+npm run dev
+```
+
+3) Seed sample data (resets the `schools` table):
+
+```
+npm run seed
+```
+
+Endpoints
+
+- GET/POST pages/api/schools.js
+
+Notes
+
+- Images are saved in `public/schoolImages`; paths are stored like `/schoolImages/xyz.webp` when uploaded during creation.
+- The API auto-creates the database if missing; the `/schools` GET is no-store so lists update immediately.
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
 
 ## Getting Started
