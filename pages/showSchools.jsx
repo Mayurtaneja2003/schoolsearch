@@ -1,6 +1,8 @@
 import useSWR from 'swr';
 import Link from 'next/link';
 
+
+const PLACEHOLDER_IMG = 'https://res.cloudinary.com/dagp859yh/image/upload/v1756819210/placeholder_sgkyw0.svg';
 const fetcher = (url) => fetch(url, { cache: 'no-store' }).then((r) => r.json());
 
 export default function ShowSchoolsPage() {
@@ -27,10 +29,10 @@ export default function ShowSchoolsPage() {
 									{(() => {
 												const raw = school.imagePath || '';
 												const src = raw
-												  ? /^https?:\/\//.test(raw)
-												    ? raw
-												    : `/${raw.replace(/\\/g, '/')}`
-												  : '/schoolImages/placeholder.svg';
+													? /^https?:\/\//.test(raw)
+														? raw
+														: `/${raw.replace(/\\/g, '/')}`
+													: PLACEHOLDER_IMG;
 										return (
 											<img
 												src={src}
@@ -38,7 +40,7 @@ export default function ShowSchoolsPage() {
 												className="w-full h-full object-cover"
 												onError={(e) => {
 													e.currentTarget.onerror = null;
-													e.currentTarget.src = '/schoolImages/placeholder.svg';
+													e.currentTarget.src = PLACEHOLDER_IMG;
 												}}
 											/>
 										);
