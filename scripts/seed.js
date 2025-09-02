@@ -8,8 +8,17 @@ async function main() {
 	const user = process.env.MYSQL_USER || 'root';
 	const password = process.env.MYSQL_PASSWORD || '';
 	const database = process.env.MYSQL_DATABASE || 'school_manager';
+	const port = process.env.MYSQL_PORT ? Number(process.env.MYSQL_PORT) : 3306;
 
-	const conn = await mysql.createConnection({ host, user, password, multipleStatements: true });
+	const config = { host, user, password, port, multipleStatements: true };
+	if (process.env.MYSQL_SSL_CA) {
+		const ca = process.env.MYSQL_SSL_CA.includes('\\n')
+			? process.env.MYSQL_SSL_CA.replace(/\\n/g, '\n')
+			: process.env.MYSQL_SSL_CA;
+		config.ssl = { ca, rejectUnauthorized: true };
+	}
+
+	const conn = await mysql.createConnection(config);
 	await conn.query(`CREATE DATABASE IF NOT EXISTS \`${database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`);
 	await conn.changeUser({ database });
 	await conn.query(`
