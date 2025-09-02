@@ -1,6 +1,5 @@
 
-import fs from 'fs';
-import path from 'path';
+
 import { IncomingForm } from 'formidable';
 import db from '@/lib/db';
 import { v2 as cloudinary } from 'cloudinary';
@@ -18,20 +17,13 @@ export const config = {
 	},
 };
 
+
 function parseForm(req) {
 	return new Promise((resolve, reject) => {
-		const uploadDir = path.join(process.cwd(), 'public', 'schoolImages');
-		try {
-			if (!fs.existsSync(uploadDir)) {
-				fs.mkdirSync(uploadDir, { recursive: true });
-			}
-		} catch (e) {
-			return reject(new Error('Cannot prepare upload directory'));
-		}
 		const form = new IncomingForm({
-			uploadDir,
-			keepExtensions: true,
 			multiples: false,
+			keepExtensions: true,
+			maxFileSize: 10 * 1024 * 1024, // 10MB
 		});
 		form.parse(req, (err, fields, files) => {
 			if (err) return reject(err);
@@ -79,25 +71,33 @@ export default async function handler(req, res) {
 			}
 
 
-			let imagePath = null;
-			const imageFile = files?.image;
-			if (imageFile) {
-				const fileObj = Array.isArray(imageFile) ? imageFile[0] : imageFile;
-				// Read file buffer
-				const fileBuffer = fs.readFileSync(fileObj.filepath || fileObj.path);
-				const fileStr = fileBuffer.toString('base64');
-				const mimetype = fileObj.mimetype || 'image/jpeg';
-				try {
-					const uploadResponse = await cloudinary.uploader.upload(
-						`data:${mimetype};base64,${fileStr}`,
-						{ folder: 'schoolImages' }
-					);
-					imagePath = uploadResponse.secure_url;
-				} catch (err) {
-					// fallback: no imagePath
-					imagePath = null;
-				}
-			}
+						let imagePath = null;
+						const imageFile = files?.image;
+						if (imageFile) {
+								const fileObj = Array.isArray(imageFile) ? imageFile[0] : imageFile;
+								// Read file as base64 from memory
+								const fsPromises = require('fs').promises;
+								const filePath = fileObj.filepath || fileObj.path;
+								let fileBuffer;
+								try {
+									fileBuffer = await fsPromises.readFile(filePath);
+								} catch (e) {
+									fileBuffer = null;
+								}
+								if (fileBuffer) {
+									const fileStr = fileBuffer.toString('base64');
+									const mimetype = fileObj.mimetype || 'image/jpeg';
+									try {
+										const uploadResponse = await cloudinary.uploader.upload(
+											`data:${mimetype};base64,${fileStr}`,
+											{ folder: 'schoolImages' }
+										);
+										imagePath = uploadResponse.secure_url;
+									} catch (err) {
+										imagePath = null;
+									}
+								}
+						}
 
 			try {
 				const result = await db.query(
