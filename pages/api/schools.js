@@ -19,17 +19,37 @@ export const config = {
 
 
 function parseForm(req) {
-	return new Promise((resolve, reject) => {
-		const form = new IncomingForm({
-			multiples: false,
-			keepExtensions: true,
-			maxFileSize: 10 * 1024 * 1024, // 10MB
+		return new Promise((resolve, reject) => {
+			const form = new IncomingForm({
+				multiples: false,
+				keepExtensions: true,
+				maxFileSize: 10 * 1024 * 1024, // 10MB
+			});
+			const filesData = {};
+			form.on('file', (name, file) => {
+				// Read file into buffer as it streams in
+				const chunks = [];
+				file.on('data', (chunk) => chunks.push(chunk));
+				file.on('end', () => {
+					// Always set buffer property
+					file.buffer = Buffer.concat(chunks);
+					filesData[name] = file;
+				});
+			});
+			form.parse(req, (err, fields, files) => {
+				if (err) return reject(err);
+				// Fallback: if no buffer, try to read from file path (for local dev)
+				for (const key in files) {
+					if (files[key] && !files[key].buffer && files[key].filepath) {
+						try {
+							files[key].buffer = require('fs').readFileSync(files[key].filepath);
+						} catch {}
+					}
+				}
+				// Merge our buffered files into files
+				resolve({ fields, files: Object.keys(filesData).length ? filesData : files });
+			});
 		});
-		form.parse(req, (err, fields, files) => {
-			if (err) return reject(err);
-			resolve({ fields, files });
-		});
-	});
 }
 
 export default async function handler(req, res) {
@@ -58,6 +78,7 @@ export default async function handler(req, res) {
 			const contact = String(fields.contact || '').trim();
 			const email = String(fields.email || '').trim();
 
+
 			if (!name || !address || !city || !state || !contact || !email) {
 				return res.status(400).json({ success: false, message: 'All fields are required.' });
 			}
@@ -70,34 +91,49 @@ export default async function handler(req, res) {
 				return res.status(400).json({ success: false, message: 'Contact must be 10 digits.' });
 			}
 
+			// Enforce unique contact, then email
+			const existingContact = await db.query(
+				'SELECT id FROM schools WHERE contact = ?',
+				[contact]
+			);
+			if (existingContact.length > 0) {
+				return res.status(400).json({ success: false, message: 'A school with this number already exists.' });
+			}
+			const existingEmail = await db.query(
+				'SELECT id FROM schools WHERE email = ?',
+				[email]
+			);
+			if (existingEmail.length > 0) {
+				return res.status(400).json({ success: false, message: 'A school with this email already exists.' });
+			}
 
-						let imagePath = null;
-						const imageFile = files?.image;
-						if (imageFile) {
-								const fileObj = Array.isArray(imageFile) ? imageFile[0] : imageFile;
-								// Read file as base64 from memory
-								const fsPromises = require('fs').promises;
-								const filePath = fileObj.filepath || fileObj.path;
-								let fileBuffer;
-								try {
-									fileBuffer = await fsPromises.readFile(filePath);
-								} catch (e) {
-									fileBuffer = null;
-								}
-								if (fileBuffer) {
-									const fileStr = fileBuffer.toString('base64');
-									const mimetype = fileObj.mimetype || 'image/jpeg';
-									try {
-										const uploadResponse = await cloudinary.uploader.upload(
-											`data:${mimetype};base64,${fileStr}`,
-											{ folder: 'schoolImages' }
-										);
-										imagePath = uploadResponse.secure_url;
-									} catch (err) {
-										imagePath = null;
-									}
-								}
-						}
+
+										let imagePath = null;
+										const imageFile = files?.image;
+										if (imageFile) {
+												const fileObj = Array.isArray(imageFile) ? imageFile[0] : imageFile;
+												// Use buffer directly if available (Vercel/serverless safe)
+												let fileBuffer = fileObj.buffer;
+												// Fallback: try to read from file path (for local dev)
+												if (!fileBuffer && fileObj.filepath) {
+													try {
+														fileBuffer = require('fs').readFileSync(fileObj.filepath);
+													} catch {}
+												}
+												if (fileBuffer) {
+													const fileStr = fileBuffer.toString('base64');
+													const mimetype = fileObj.mimetype || 'image/jpeg';
+													try {
+														const uploadResponse = await cloudinary.uploader.upload(
+															`data:${mimetype};base64,${fileStr}`,
+															{ folder: 'schoolImages' }
+														);
+														imagePath = uploadResponse.secure_url;
+													} catch (err) {
+														imagePath = null;
+													}
+												}
+										}
 
 			try {
 				const result = await db.query(

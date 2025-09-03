@@ -25,22 +25,33 @@ export default function AddSchoolPage() {
 		if (values.image?.[0]) {
 			formData.append('image', values.image[0]);
 		}
-		try {
-			const res = await fetch('/api/schools', {
-				method: 'POST',
-				body: formData,
-			});
-			const data = await res.json();
-			if (!res.ok) {
-				const details = data?.error ? `: ${data.error}` : '';
-				throw new Error((data?.message || 'Failed to save') + details);
-			}
-			setServerSuccess('School added successfully.');
-			reset();
-		} catch (err) {
-			console.error('Create school failed:', err);
-			setServerError(err.message);
-		}
+	       try {
+		       const res = await fetch('/api/schools', {
+			       method: 'POST',
+			       body: formData,
+		       });
+		       const data = await res.json();
+		       if (!res.ok) {
+			       // Custom error handling for duplicate name/email/number
+			       let msg = data?.message || 'Failed to save';
+			       if (msg.includes('name') && msg.includes('email')) {
+				       msg = 'A school already exists with this name or email.';
+			       } else if (msg.includes('email')) {
+				       msg = 'A school already exists with this email.';
+			       } else if (msg.includes('name')) {
+				       msg = 'A school already exists with this name.';
+			       } else if (msg.includes('Contact must be 10 digits')) {
+				       msg = 'A school already exists with this number.';
+			       }
+			       setServerError(msg);
+			       return;
+		       }
+		       setServerSuccess('School added successfully.');
+		       reset();
+	       } catch (err) {
+		       console.error('Create school failed:', err);
+		       setServerError(err.message);
+	       }
 	}
 
 	return (
